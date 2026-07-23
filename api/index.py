@@ -1,55 +1,52 @@
-from flask import Flask, request, Response
-import requests
-import re
+try:
+    url = f"https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
 
-app = Flask(__name__)
+    r = requests.get(url, timeout=20)
+    text = r.text
 
-API_KEY = "AnuragSingh"
+    def get_value(start, end_list):
+        try:
+            s = text.index(start) + len(start)
+            e = len(text)
 
-@app.route("/api")
-def lookup():
+            for end in end_list:
+                pos = text.find(end, s)
+                if pos != -1 and pos < e:
+                    e = pos
 
-    if request.args.get("apikey") != API_KEY:
-        return Response("INVALID API KEY", mimetype="text/plain")
+            return text[s:e].strip()
+        except:
+            return None
 
-    number = request.args.get("number")
+    name = get_value("Name:", ["Father Name:"])
+    father = get_value("Father Name:", ["Mobile:"])
+    mobile = get_value("Mobile:", ["Address:"])
+    address = get_value("Address:", ["Circle:", "Owner:"])
 
-    if not number:
-        return Response("NUMBER REQUIRED", mimetype="text/plain")
+    # Agar Name hi nahi mila to Error
+    if not name:
+        return Response(
+            "API ERROR CONTACT OWNER\n@Developer_NovaG",
+            mimetype="text/plain"
+        )
 
-    try:
-
-        url = f"https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
-
-        r = requests.get(url, timeout=20)
-        text = r.text
-
-        name = re.search(r"Name:\s*(.+)", text)
-        father = re.search(r"Father Name:\s*(.+)", text)
-        mobile = re.search(r"Mobile:\s*(.+)", text)
-        address = re.search(r"Address:\s*(.+)", text)
-
-        if not all([name, father, mobile, address]):
-            raise Exception()
-
-        result = f"""🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
+    result = f"""🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
 ___________________________________________
 
-NAME :- {name.group(1).strip()}
+NAME :- {name}
 ---------------------------------------------------------------------------
-FATHER NAME :- {father.group(1).strip()}
+FATHER NAME :- {father if father else "N/A"}
 ---------------------------------------------------------------------------
-MOBILE :- {mobile.group(1).strip()}
+MOBILE :- {mobile if mobile else number}
 ---------------------------------------------------------------------------
-ADDRESS :- {address.group(1).strip()}
+ADDRESS :- {address if address else "N/A"}
 ---------------------------------------------------------------------------
 Owner @Developer_NovaG"""
 
-        return Response(result, mimetype="text/plain")
+    return Response(result, mimetype="text/plain; charset=utf-8")
 
-    except:
-        return Response("""API ERROR CONTACT OWNER
-@Developer_NovaG""", mimetype="text/plain")
-
-
-app = app
+except:
+    return Response(
+        "API ERROR CONTACT OWNER\n@Developer_NovaG",
+        mimetype="text/plain"
+    )
