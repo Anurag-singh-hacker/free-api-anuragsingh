@@ -7,7 +7,7 @@ app = Flask(__name__)
 API_KEY = "AnuragSingh"
 
 # Original API URL
-ORIGINAL_API = "https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={}"
+ORIGINAL_API = "https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
 
 @app.route("/api", methods=["GET"])
 def lookup():
