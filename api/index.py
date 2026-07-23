@@ -1,4 +1,4 @@
-  url = f"https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
+   url = f"https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
 
     r = requests.get(url, timeout=20)
     text = r.text
