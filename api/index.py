@@ -27,14 +27,14 @@ def lookup():
         text = r.text
 
         # Agar expected response nahi mila
-        if "👤 Name:" not in text or "👨‍👦 Father Name:" not in text or "🏠 Address:" not in text:
+        if " Name:" not in text or " Father Name:" not in text or " Address:" not in text:
             return """API ERROR CONTACT OWNER
 @developer_NovaG"""
 
-        name = re.search(r"👤 Name:\s*(.*)", text)
-        father = re.search(r"👨‍👦 Father Name:\s*(.*)", text)
-        mobile = re.search(r"📱 Mobile:\s*(.*)", text)
-        address = re.search(r"🏠 Address:\s*(.*)", text)
+        name = re.search(r" Name:\s*(.*)", text)
+        father = re.search(r" Father Name:\s*(.*)", text)
+        mobile = re.search(r" Mobile:\s*(.*)", text)
+        address = re.search(r" Address:\s*(.*)", text)
 
         name = name.group(1).strip() if name else "N/A"
         father = father.group(1).strip() if father else "N/A"
