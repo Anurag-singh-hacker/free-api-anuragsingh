@@ -4,46 +4,34 @@ try:
     r = requests.get(url, timeout=20)
     text = r.text
 
-    def get_value(start, end_list):
-        try:
-            s = text.index(start) + len(start)
-            e = len(text)
-
-            for end in end_list:
-                pos = text.find(end, s)
-                if pos != -1 and pos < e:
-                    e = pos
-
-            return text[s:e].strip()
-        except:
-            return None
-
-    name = get_value("Name:", ["Father Name:"])
-    father = get_value("Father Name:", ["Mobile:"])
-    mobile = get_value("Mobile:", ["Address:"])
-    address = get_value("Address:", ["Circle:", "Owner:"])
-
-    # Agar Name hi nahi mila to Error
-    if not name:
+    # Agar Name nahi mila to Error
+    if "Name:" not in text:
         return Response(
             "API ERROR CONTACT OWNER\n@Developer_NovaG",
             mimetype="text/plain"
         )
 
-    result = f"""🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
-___________________________________________
+    # Upar ka heading replace karo
+    text = text.replace(
+        "🔍 NUMBER LOOKUP RESULT",
+        "🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥"
+    )
 
-NAME :- {name}
----------------------------------------------------------------------------
-FATHER NAME :- {father if father else "N/A"}
----------------------------------------------------------------------------
-MOBILE :- {mobile if mobile else number}
----------------------------------------------------------------------------
-ADDRESS :- {address if address else "N/A"}
----------------------------------------------------------------------------
-Owner @Developer_NovaG"""
+    # Agar bina space wala ho
+    text = text.replace(
+        "🔍NUMBER LOOKUP RESULT",
+        "🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥"
+    )
 
-    return Response(result, mimetype="text/plain; charset=utf-8")
+    # Original Owner replace karo
+    text = re.sub(
+        r"Owner:.*",
+        "Owner @Developer_NovaG",
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    return Response(text, mimetype="text/plain; charset=utf-8")
 
 except:
     return Response(
