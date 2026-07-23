@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response
 import requests
 import re
 
@@ -6,59 +6,50 @@ app = Flask(__name__)
 
 API_KEY = "AnuragSingh"
 
-# Original API URL
-ORIGINAL_API = "https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
-
-@app.route("/api", methods=["GET"])
+@app.route("/api")
 def lookup():
 
-    key = request.args.get("apikey")
+    if request.args.get("apikey") != API_KEY:
+        return Response("INVALID API KEY", mimetype="text/plain")
+
     number = request.args.get("number")
 
-    if key != API_KEY:
-        return "INVALID API KEY"
-
     if not number:
-        return "NUMBER REQUIRED"
+        return Response("NUMBER REQUIRED", mimetype="text/plain")
 
     try:
-        url = ORIGINAL_API.format(number)
+
+        url = f"https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={number}"
+
         r = requests.get(url, timeout=20)
         text = r.text
 
-        # Agar expected response nahi mila
-        if " Name:" not in text or " Father Name:" not in text or " Address:" not in text:
-            return """API ERROR CONTACT OWNER
-@developer_NovaG"""
+        name = re.search(r"Name:\s*(.+)", text)
+        father = re.search(r"Father Name:\s*(.+)", text)
+        mobile = re.search(r"Mobile:\s*(.+)", text)
+        address = re.search(r"Address:\s*(.+)", text)
 
-        name = re.search(r" Name:\s*(.*)", text)
-        father = re.search(r" Father Name:\s*(.*)", text)
-        mobile = re.search(r" Mobile:\s*(.*)", text)
-        address = re.search(r" Address:\s*(.*)", text)
+        if not all([name, father, mobile, address]):
+            raise Exception()
 
-        name = name.group(1).strip() if name else "N/A"
-        father = father.group(1).strip() if father else "N/A"
-        mobile = mobile.group(1).strip() if mobile else number
-        address = address.group(1).strip() if address else "N/A"
-
-        result = f"""🔥  PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
+        result = f"""🔥 PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
 ___________________________________________
 
-NAME :- {name}
+NAME :- {name.group(1).strip()}
 ---------------------------------------------------------------------------
-FATHER NAME :- {father}
+FATHER NAME :- {father.group(1).strip()}
 ---------------------------------------------------------------------------
-MOBILE :- {mobile}
+MOBILE :- {mobile.group(1).strip()}
 ---------------------------------------------------------------------------
-ADDRESS :- {address}
+ADDRESS :- {address.group(1).strip()}
 ---------------------------------------------------------------------------
 Owner @Developer_NovaG"""
 
-        return result, 200, {"Content-Type": "text/plain; charset=utf-8"}
+        return Response(result, mimetype="text/plain")
 
     except:
-        return """API ERROR CONTACT OWNER
-@developer_NovaG"""
+        return Response("""API ERROR CONTACT OWNER
+@Developer_NovaG""", mimetype="text/plain")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+
+app = app
