@@ -1,37 +1,64 @@
-export default async function handler(req, res) {
-  const { num } = req.query;
+from flask import Flask, request, jsonify
+import requests
+import re
 
-  if (!num) {
-    return res.status(400).json({
-      success: false,
-      message: "num parameter missing"
-    });
-  }
+app = Flask(__name__)
 
-  try {
-    const response = await fetch(
-      `https://anurag-singh-api45.vercel.app/api/number?num=${encodeURIComponent(num)}`
-    );
+API_KEY = "AnuragSingh"
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        success: false,
-        message: "Upstream API error"
-      });
-    }
+# Original API URL
+ORIGINAL_API = "https://nitin-apis-update-birthday-spacial.vercel.app/api?type=number&search={}"
 
-    const data = await response.json();
+@app.route("/api", methods=["GET"])
+def lookup():
 
-    // Response Edit
-    data.by = "@developer_NovaG";
-    data.channel = "https://t.me/YOUR_CHANNEL";
+    key = request.args.get("apikey")
+    number = request.args.get("number")
 
-    return res.status(200).json(data);
+    if key != API_KEY:
+        return "INVALID API KEY"
 
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-      }
+    if not number:
+        return "NUMBER REQUIRED"
+
+    try:
+        url = ORIGINAL_API.format(number)
+        r = requests.get(url, timeout=20)
+        text = r.text
+
+        # Agar expected response nahi mila
+        if "👤 Name:" not in text or "👨‍👦 Father Name:" not in text or "🏠 Address:" not in text:
+            return """API ERROR CONTACT OWNER
+@developer_NovaG"""
+
+        name = re.search(r"👤 Name:\s*(.*)", text)
+        father = re.search(r"👨‍👦 Father Name:\s*(.*)", text)
+        mobile = re.search(r"📱 Mobile:\s*(.*)", text)
+        address = re.search(r"🏠 Address:\s*(.*)", text)
+
+        name = name.group(1).strip() if name else "N/A"
+        father = father.group(1).strip() if father else "N/A"
+        mobile = mobile.group(1).strip() if mobile else number
+        address = address.group(1).strip() if address else "N/A"
+
+        result = f"""🔥  PREMIUM NUMBER FINDER BY ANURAG SINGH 🔥
+___________________________________________
+
+NAME :- {name}
+---------------------------------------------------------------------------
+FATHER NAME :- {father}
+---------------------------------------------------------------------------
+MOBILE :- {mobile}
+---------------------------------------------------------------------------
+ADDRESS :- {address}
+---------------------------------------------------------------------------
+Owner @Developer_NovaG"""
+
+        return result, 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+    except:
+        return """API ERROR CONTACT OWNER
+@developer_NovaG"""
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
